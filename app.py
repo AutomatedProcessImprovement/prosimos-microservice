@@ -5,7 +5,6 @@ from api.ProsimosApiHandler import ProsimosApiHandler
 
 app = Flask(__name__, static_url_path='', static_folder='frontend/build')
 api = Api(app)
-# CORS(app, resources={r'/*' : {'origins': ['http://localhost:5000']}})
 CORS(app)
 
 @app.route("/", defaults={'path':''})
