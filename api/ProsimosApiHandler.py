@@ -3,6 +3,7 @@ from io import StringIO
 from flask import request, make_response
 from flask_restful import Resource
 from bpdfr_simulation_engine.simulation_engine import run_simulation
+from datetime import datetime
 
 class ProsimosApiHandler(Resource):
   def __getJsonString(self, out):
@@ -28,8 +29,10 @@ class ProsimosApiHandler(Resource):
     with open(bpmn_path, 'w') as file_writter:
       file_writter.write(xmlData)
 
+    date = datetime.strptime(startDate, "%Y-%m-%dT%H:%M:%S.%f%z")
+
     # run simulation
-    res = run_simulation(bpmn_path, json_path, total_cases=numProcesses, stat_out_path=stat_out_path)
+    _ = run_simulation(bpmn_path, json_path, total_cases=numProcesses, stat_out_path=stat_out_path, starting_at=date)
 
     with open(stat_out_path) as f:
       contents = f.read()
