@@ -1,0 +1,20 @@
+FROM python:3.9
+
+RUN python3 -m pip install --upgrade pip
+
+WORKDIR /app
+COPY . .
+RUN git submodule update --init --recursive
+RUN pip install -r requirements.txt
+
+WORKDIR /app/external_tools/Prosimos
+RUN pip install -r requirements.txt
+
+# RUN file = "$(pip list)" && echo $file
+
+WORKDIR /app
+
+ENV FLASK_ENV production
+
+EXPOSE 5000
+CMD ["gunicorn", "-b", ":5000", "app:app"]
