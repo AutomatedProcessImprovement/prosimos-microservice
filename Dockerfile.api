@@ -1,4 +1,4 @@
-FROM python:3.9.10-slim-buster
+FROM python:3.9-slim-buster
 
 WORKDIR /app
 RUN apt-get update && apt-get install -y git
@@ -9,12 +9,14 @@ COPY .gitmodules/ .
 
 RUN git submodule update --init --recursive
 
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt --no-cache
+
 COPY ./api ./api
-COPY ./requirements.txt ./app.py .
-RUN pip install -r requirements.txt
+COPY ./app.py .
 
 WORKDIR /app/external_tools/Prosimos
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --no-cache
 
 # RUN file = "$(pip list)" && echo $file
 
