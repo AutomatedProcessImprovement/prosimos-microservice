@@ -1,8 +1,9 @@
 FROM python:3.9-slim-buster
 
 WORKDIR /app
-RUN apt-get update && apt-get install -y git
-RUN python3 -m pip install --upgrade pip
+RUN apt-get update && \
+    apt-get install -y git && \
+    python3 -m pip install --upgrade pip
 
 COPY .git/ ./.git/
 COPY .gitmodules/ .
@@ -10,13 +11,13 @@ COPY .gitmodules/ .
 RUN git submodule update --init --recursive
 
 COPY ./requirements.txt .
-RUN pip install -r requirements.txt --no-cache
+RUN pip install -r requirements.txt --no-cache-dir
 
 COPY ./api ./api
 COPY ./app.py .
 
 WORKDIR /app/external_tools/Prosimos
-RUN pip install -r requirements.txt --no-cache
+RUN pip install -r requirements.txt --no-cache-dir
 
 # RUN file = "$(pip list)" && echo $file
 
