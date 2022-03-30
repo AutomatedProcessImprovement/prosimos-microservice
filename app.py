@@ -17,7 +17,7 @@ def handle_exception(err):
     return response, 500
 
 app.register_error_handler(500, handle_exception)
-api = Api(app)
+api = Api(app, prefix='/api')
 CORS(app)
 
 @app.route("/", defaults={'path':''})
