@@ -1,29 +1,41 @@
-FROM python:3.9-slim-buster
+# stage 1: build
+FROM python:3.9-slim-buster AS builder
 
-WORKDIR /app
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 RUN apt-get update && \
     apt-get install -y git && \
     python3 -m pip install --upgrade pip
 
+WORKDIR /app
+
 COPY .git/ ./.git/
 COPY .gitmodules/ .
+COPY ./requirements.txt .
 
 RUN git submodule update --init --recursive
 
-COPY ./requirements.txt .
-RUN pip install -r requirements.txt --no-cache-dir
+RUN rm /app/external_tools/Prosimos/input_output_files.zip && \
+    pip install -r requirements.txt && \
+    cd /app/external_tools/Prosimos && \
+    pip install -r requirements.txt --no-cache-dir && \
+    apt-get clean
 
-COPY ./api ./api
-COPY ./app.py .
-# TODO: remove after new json will be implemented
-COPY ./temp_files/bimp_example.json ./temp_files/bimp_example.json
+# stage 2: run the flask app
+FROM python:3.9-slim-buster
 
-WORKDIR /app/external_tools/Prosimos
-RUN pip install -r requirements.txt --no-cache-dir
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# RUN file = "$(pip list)" && echo $file
+COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /app/external_tools /app/external_tools
 
 WORKDIR /app
+COPY ./api ./api
+COPY ./app.py .
 
 ENV FLASK_ENV production
 
