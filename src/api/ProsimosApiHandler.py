@@ -4,7 +4,7 @@ from flask import request, make_response
 from flask_restful import Resource
 from bpdfr_simulation_engine.simulation_engine import run_simulation
 from datetime import datetime
-import tempfile as tfile
+import tempfile
 
 class ProsimosApiHandler(Resource):
   def __getJsonString(self, out):
@@ -14,30 +14,30 @@ class ProsimosApiHandler(Resource):
 
   def post(self):
     try:
-      formData = request.form
-      filesData = request.files
-      numProcesses = formData.get('numProcesses')
-      startDate = formData.get('startDate')
-      parametersData = filesData.get('jsonFile')
-      xmlData = filesData.get('xmlFile')
+      form_date = request.form
+      files_data = request.files
+      num_processes = form_date.get('numProcesses')
+      start_date = form_date.get('startDate')
+      parameters_data = files_data.get('jsonFile')
+      xml_data = files_data.get('xmlFile')
 
-      json_file = tfile.NamedTemporaryFile(mode="w+", suffix=".json", prefix="params_", delete=False, dir='/tmp')
-      bpmn_file = tfile.NamedTemporaryFile(mode="w+", suffix=".bpmn", prefix="bpmn_model_", delete=False, dir='/tmp')
-      stats_file = tfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="stats_", delete=False, dir='/tmp')
-      logs_file = tfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="logs_", delete=False, dir='/tmp')
+      json_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".json", prefix="params_", delete=False, dir='/tmp')
+      bpmn_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".bpmn", prefix="bpmn_model_", delete=False, dir='/tmp')
+      stats_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="stats_", delete=False, dir='/tmp')
+      logs_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="logs_", delete=False, dir='/tmp')
       logs_filename = logs_file.name.rsplit('/', 1)[-1]
 
       with open(json_file.name, 'wb') as f:
-        parametersData.save(f)
+        parameters_data.save(f)
 
       with open(bpmn_file.name, 'wb') as f:
-        xmlData.save(f)
+        xml_data.save(f)
 
-      date = datetime.strptime(startDate, "%Y-%m-%dT%H:%M:%S.%f%z")
+      date = datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%S.%f%z")
 
       # run simulation
       _ = run_simulation(bpmn_file.name, json_file.name,
-        total_cases=int(numProcesses),
+        total_cases=int(num_processes),
         stat_out_path=stats_file.name,
         log_out_path=logs_file.name,
         starting_at=date)

@@ -34,7 +34,7 @@ COPY --from=builder /opt/venv /opt/venv
 COPY --from=builder /app/external_tools /app/external_tools
 
 WORKDIR /app
-COPY ./api ./api
+COPY ./src ./src
 COPY ./app.py .
 
 ENV FLASK_ENV production
