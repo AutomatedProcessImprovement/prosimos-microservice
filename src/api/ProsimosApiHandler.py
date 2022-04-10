@@ -1,4 +1,3 @@
-import json
 import pandas as pd
 from io import StringIO
 from flask import request, make_response
@@ -15,30 +14,30 @@ class ProsimosApiHandler(Resource):
 
   def post(self):
     try:
-      content = request.json
-      numProcesses = content['numProcesses']
-      startDate = content['startDate']
-      jsonData = content['jsonData']
-      xmlData = content['xmlData']
+      formData = request.form
+      filesData = request.files
+      numProcesses = formData.get('numProcesses')
+      startDate = formData.get('startDate')
+      parametersData = filesData.get('jsonFile')
+      xmlData = filesData.get('xmlFile')
 
-      # json_path = "./temp_files/bimp_example.json" 
       json_file = tfile.NamedTemporaryFile(mode="w+", suffix=".json", prefix="params_", delete=False, dir='/tmp')
       bpmn_file = tfile.NamedTemporaryFile(mode="w+", suffix=".bpmn", prefix="bpmn_model_", delete=False, dir='/tmp')
       stats_file = tfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="stats_", delete=False, dir='/tmp')
       logs_file = tfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="logs_", delete=False, dir='/tmp')
       logs_filename = logs_file.name.rsplit('/', 1)[-1]
 
-      with json_file as file_writter:
-        json.dump(jsonData, file_writter)
-      
-      with bpmn_file as f:
-        f.write(xmlData)
+      with open(json_file.name, 'wb') as f:
+        parametersData.save(f)
+
+      with open(bpmn_file.name, 'wb') as f:
+        xmlData.save(f)
 
       date = datetime.strptime(startDate, "%Y-%m-%dT%H:%M:%S.%f%z")
 
       # run simulation
       _ = run_simulation(bpmn_file.name, json_file.name,
-        total_cases=numProcesses,
+        total_cases=int(numProcesses),
         stat_out_path=stats_file.name,
         log_out_path=logs_file.name,
         starting_at=date)
@@ -66,8 +65,7 @@ class ProsimosApiHandler(Resource):
     except Exception as e:
       print(e)
       response = {
-        "displayMessage": "Something went wrong",
-        # "errorDesciption": jsonify(e)
+        "displayMessage": "Something went wrong"
       }
 
       return response, 500

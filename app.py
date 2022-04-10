@@ -1,8 +1,8 @@
 from flask import Flask, jsonify
 from flask_restful import Api
 from flask_cors import CORS
-from api.FileApiHandler import FileApiHandler
-from api.ProsimosApiHandler import ProsimosApiHandler
+from src.api.FileApiHandler import FileApiHandler
+from src.api.ProsimosApiHandler import ProsimosApiHandler
 
 app = Flask(__name__, static_url_path='', static_folder='frontend/build')
 
