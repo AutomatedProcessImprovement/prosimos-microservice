@@ -25,23 +25,13 @@ class ParamsApiHandler(Resource):
       print(logs_temp_file)
       print(logs_temp_file.name)
 
-      [granule, conf, supp, part, adj_calendar] = [60, 0.2, 0.8, 0.4, False]
+      [granule, conf, supp, part, adj_calendar] = [60, 0.1, 0.7, 0.3, True]
 
-      [diff_resource_profiles,
-    arrival_time_dist,
-    json_arrival_calendar,
-    gateways_branching,
-    task_res_dist,
-    task_resources,
-    diff_res_calendars,
-    task_events,
-    task_resource_events,
-    id_from_name] = preprocess_xes_log(logs_temp_file.name,
+      _ = preprocess_xes_log(logs_temp_file.name,
                                         model_temp_file.name,
                                         res_temp_file.name, granule, conf, supp, part,
                                         adj_calendar)
 
-      print(diff_res_calendars)
       return send_file(res_temp_file.name,
                 mimetype="application/json",
                 attachment_filename="parameters.json", as_attachment=True)
