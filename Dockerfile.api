@@ -15,13 +15,17 @@ COPY .git/ ./.git/
 COPY .gitmodules/ .
 COPY ./requirements.txt .
 
-RUN git submodule update --init --recursive
+# define from where we need to load Prosimos app
+# 1) pull from the repository main branch
+# RUN git submodule update --init --recursive
 
-RUN rm /app/external_tools/Prosimos/input_output_files.zip && \
-    pip install -r requirements.txt && \
-    cd /app/external_tools/Prosimos && \
-    pip install -r requirements.txt --no-cache-dir && \
-    apt-get clean
+# 2) use local version of Prosimos (under the path ./external_tools/Prosimos)
+COPY external_tools/Prosimos external_tools/Prosimos
+
+RUN rm /app/external_tools/Prosimos/input_output_files.zip
+RUN pip install -r requirements.txt 
+RUN cd /app/external_tools/Prosimos && pip install -r requirements.txt
+RUN apt-get clean
 
 # stage 2: run the flask app
 FROM python:3.9-slim-buster
@@ -40,4 +44,4 @@ COPY ./app.py .
 ENV FLASK_ENV production
 
 EXPOSE 5000
-CMD ["gunicorn", "-b", ":5000", "app:app"]
+CMD ["gunicorn", "--workers=3", "--threads=3", "-b", ":5000", "app:app", "--timeout 1000"]
