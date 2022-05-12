@@ -11,19 +11,33 @@
 
 1. Discover simulation parameters based on logs. 
 ```
-curl -X POST "http://localhost:5000/api/discovery" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "bpmnFile=@purchasing_example.bpmn" -F "logsFile=@PurchasingExample.xes"
+curl \
+    -X POST "http://localhost:5000/api/discovery" \
+    -H "accept: application/json" \
+    -H "Content-Type: multipart/form-data" \
+    -F "bpmnFile=@purchasing_example.bpmn" \
+    -F "logsFile=@PurchasingExample.xes"
 ```
 where `@purchasing_example.bpmn` and `@PurchasingExample.xes` should be replaced with the full path to the file on your computer, for example, `@"/Users/iryna/Documents/proposed.json"`
 
 2. Perform the simulation
 ```
-curl -X POST "http://localhost:5000/api/simulate" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "startDate=2022-05-03T12:05:19.1919+03:00" -F "numProcesses=1" -F "modelFile=@purchasing_example.bpmn" -F "simScenarioFile=@discovery_results_mos9tbez.json;type=application/json"
+curl \
+    -X POST "http://localhost:5000/api/simulate" \
+    -H "accept: application/json" \
+    -H "Content-Type: multipart/form-data" \
+    -F "startDate=2022-05-03T12:05:19.1919+03:00" \
+    -F "numProcesses=1" \
+    -F "modelFile=@purchasing_example.bpmn" \
+    -F "simScenarioFile=@discovery_results_mos9tbez.json;type=application/json"
 ```
 where `@purchasing_example.bpmn` and `@discovery_results_mos9tbez.json` should be replaced with the full path to the file on your computer.
 
 3. Get files generated together with the simulation (logs and statistics). 
 ```
-curl -X GET "http://localhost:5000/api/simulationFile?fileName=stats_kjv4fq1r.csv" -H "accept: application/json"
+curl \
+    -X GET "http://localhost:5000/api/simulationFile?fileName=stats_kjv4fq1r.csv" \
+    -H "accept: application/json"
 ```
 where `stats_kjv4fq1r.csv` should be replaced with the filename which you want to get (the filename is being returned on `/api/simulate` call).
 
