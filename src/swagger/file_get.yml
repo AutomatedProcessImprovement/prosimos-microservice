@@ -1,0 +1,20 @@
+Get file which is temporarily saved on the server
+---
+tags:
+  - Simulation
+parameters:
+  - in: query
+    name: fileName
+    type: string
+    required: true
+    description: Filename of the file (returned as a part of /api/simulate)
+    example: stats_xxxxxxxx.csv
+responses:
+  200:
+    description: File successfully found and returned
+    content:
+        application/json
+  500:
+    description: Something went wrong
+  404:
+    description: File does not exist

@@ -1,10 +1,12 @@
 from flask import abort, request, send_file
 from flask_restful import Resource
 import tempfile
+from flasgger import swag_from
 
 from bpdfr_discovery.log_parser import preprocess_xes_log
 
-class ParamsApiHandler(Resource):
+class DiscoveryApiHandler(Resource):
+  @swag_from('./../swagger/discovery_post.yml', methods=['POST'])
   def post(self):
     try:
       dir_prefix = "/tmp"

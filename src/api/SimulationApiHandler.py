@@ -5,25 +5,28 @@ from flask_restful import Resource
 from bpdfr_simulation_engine.simulation_engine import run_simulation
 from datetime import datetime
 import tempfile
+from flasgger import swag_from
 
-class ProsimosApiHandler(Resource):
+class SimulationApiHandler(Resource):
   def __getJsonString(self, out):
     df_out = pd.read_csv(StringIO(out), skiprows=1)
     df_out_json = df_out.to_json(orient='records')
     return df_out_json
 
+  @swag_from('./../swagger/simulation_post.yml', methods=['POST'])
   def post(self):
     try:
       form_date = request.form
       files_data = request.files
       num_processes = form_date.get('numProcesses')
       start_date = form_date.get('startDate')
-      parameters_data = files_data.get('jsonFile')
-      xml_data = files_data.get('xmlFile')
+      parameters_data = files_data.get('simScenarioFile')
+      xml_data = files_data.get('modelFile')
 
       json_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".json", prefix="params_", delete=False, dir='/tmp')
       bpmn_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".bpmn", prefix="bpmn_model_", delete=False, dir='/tmp')
       stats_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="stats_", delete=False, dir='/tmp')
+      stats_filename = stats_file.name.rsplit('/', 1)[-1]
       logs_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="logs_", delete=False, dir='/tmp')
       logs_filename = logs_file.name.rsplit('/', 1)[-1]
 
@@ -52,10 +55,11 @@ class ProsimosApiHandler(Resource):
       df_out4_json = self.__getJsonString(out4)
 
       str = f"""{{
-              "Resource Utilization": {df_out2_json},
-              "Individual Task Statistics": {df_out3_json},
-              "Overall Scenario Statistics": {df_out4_json},
-              "LogFileName": "{logs_filename}"
+              "ResourceUtilization": {df_out2_json},
+              "IndividualTaskStatistics": {df_out3_json},
+              "OverallScenarioStatistics": {df_out4_json},
+              "LogsFilename": "{stats_filename}",
+              "StatsFilename": "{logs_filename}"
             }}"""
 
       response = make_response(str)

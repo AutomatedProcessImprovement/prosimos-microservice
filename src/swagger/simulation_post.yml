@@ -1,0 +1,48 @@
+Perform the simulation
+---
+tags:
+  - Simulation
+parameters:
+  - in: formData
+    name: startDate
+    type: string
+    required: true
+    description: Datetime of the first process case in the simulation
+    default: "2022-05-03T12:05:19.1919+03:00"
+  - in: formData
+    name: numProcesses
+    type: string
+    required: true
+    description: Number of process instances to simulate
+    example: 1
+  - in: formData
+    name: modelFile
+    type: file
+    required: true
+    description: Process model written in the Business Process Model and Notation (BPMN)
+  - in: formData
+    name: simScenarioFile
+    type: file
+    required: true
+    description: JSON file describing the simulation parameters
+responses:
+  200:
+    description: Simulation performed successfully
+    schema:
+      id: SimulationResult
+      properties:
+        ResourceUtilization:
+          type: object
+        IndividualTaskStatistics:
+          type: object
+        OverallScenarioStatistics:
+          type: object
+        LogsFilename:
+          type: string
+          description: Filename of the generated logs file temporarily stored on the server
+        StatsFilename:
+          type: string
+          description: Filename of the generated file with statistics temporarily stored on the server
+
+  500:
+    description: Something went wrong
