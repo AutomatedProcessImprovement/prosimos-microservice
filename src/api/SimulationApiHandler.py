@@ -58,8 +58,8 @@ class SimulationApiHandler(Resource):
               "ResourceUtilization": {df_out2_json},
               "IndividualTaskStatistics": {df_out3_json},
               "OverallScenarioStatistics": {df_out4_json},
-              "LogsFilename": "{stats_filename}",
-              "StatsFilename": "{logs_filename}"
+              "LogsFilename": "{logs_filename}",
+              "StatsFilename": "{stats_filename}"
             }}"""
 
       response = make_response(str)
