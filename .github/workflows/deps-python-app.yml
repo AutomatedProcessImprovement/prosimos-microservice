@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  SUBMODULE_PATH: /app/external_tools/Prosimos
+  SUBMODULE_PATH: ./external_tools/Prosimos
 
 permissions:
   contents: read
