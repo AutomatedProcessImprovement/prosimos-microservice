@@ -27,7 +27,7 @@ class DiscoveryApiHandler(Resource):
       print(logs_temp_file)
       print(logs_temp_file.name)
 
-      [granule, conf, supp, part, adj_calendar] = [60, 0.1, 0.7, 0.3, True]
+      [granule, conf, supp, part, adj_calendar] = [60, 0.1, 0.9, 0.6, True]
 
       _ = preprocess_xes_log(logs_temp_file.name,
                                         model_temp_file.name,
