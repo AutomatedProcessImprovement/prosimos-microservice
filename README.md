@@ -1,8 +1,41 @@
-# Prosimos API (backend)
+# Prosimos Web Server
 
-## Start the API via the docker
-1) `docker build --progress=plain --no-cache -f Dockerfile.api -t prosimos-api .`
-2) `docker run --rm -p 5000:5000 prosimos-api`
+The open-source web server implemented as a part of the [Prosimos Web Application](https://github.com/AutomatedProcessImprovement/prosimos-docker). 
+
+## Start the web server locally (via locally installed Python)
+> Please, note that you need to have `Python` installed in order to follow the following steps. The installation instructions could be found here: https://wiki.python.org/moin/BeginnersGuide/Download. Requirements for the Python version: 3.8.2 or greater.
+
+1) Create a new virtual environment
+    ```
+    python3 -m venv env
+    ```
+
+2) Activate it
+    ```
+    source env/bin/activate
+    ```
+
+3) Install all required modules. They are listed in [requirements.txt](https://github.com/AutomatedProcessImprovement/prosimos-microservice/blob/main/requirements.txt)
+    ```
+    pip3 install -r requirements.txt
+    ```
+
+4) The web server is now running and available here: http://localhost:5000/apidocs/. The page lists all available endpoints and describes its input and output parameters. The detailed overview of how to use the Swagger is available [here](#access-api-endpoints) under `Swagger` section. Documentation also includes the description of how `curl` can be used to perform the requests.
+
+
+## Start the web server locally (via Docker)
+> Please, note that you need to have `Docker` installed in order to follow the following steps. The installation instructions could be found here: https://docs.docker.com/get-docker/
+
+0) *Pre-requisite step*: Docker is running.
+1) Build the image from the current code version in the repository. 
+    ```
+    docker build --progress=plain --no-cache -f Dockerfile.api -t prosimos-api .
+    ```
+2) Start the container
+    ```
+    docker run --rm -p 5000:5000 prosimos-api
+    ```
+3) The web server is now running and available here: http://localhost:5000/apidocs/. The page lists all available endpoints and describes its input and output parameters. The detailed overview of how to use the Swagger is available [here](#access-api-endpoints) under `Swagger` section. Documentation also includes the description of how `curl` can be used to perform the requests.
 
 ## Access API endpoints 
 
@@ -51,6 +84,8 @@ To access Swagger and perform API calls directly from the web browser, you can a
 ![swagger-ui](https://user-images.githubusercontent.com/14131790/168087906-19788c31-9d2d-4f30-9401-7d05ddd94f54.png)
 </details>
 
+## Development
+<details><summary>Development notes</summary>
 
 ## Release the new version of the API docker image
 1) Build the image from the current code version.
@@ -83,3 +118,4 @@ To access Swagger and perform API calls directly from the web browser, you can a
     ```
     git push origin v0.1.2
     ```
+</summary>
