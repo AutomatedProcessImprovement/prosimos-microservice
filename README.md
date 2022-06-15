@@ -1,6 +1,10 @@
 # Prosimos Web Server
 
-The open-source web server implemented as a part of the [Prosimos Web Application](https://github.com/AutomatedProcessImprovement/prosimos-docker). 
+![dependencies_badge](https://github.com/AutomatedProcessImprovement/prosimos-microservice/actions/workflows/deps-python-app.yml/badge.svg)
+
+![dependencies_badge](https://github.com/AutomatedProcessImprovement/prosimos-microservice/actions/workflows/docker-image.yml/badge.svg)
+
+The open-source web server implemented as a part of the [Prosimos Web Application](https://github.com/AutomatedProcessImprovement/prosimos-docker).
 
 ## Start the web server locally (via locally installed Python)
 > Please, note that you need to have `Python` installed in order to follow the following steps. The installation instructions could be found here: https://wiki.python.org/moin/BeginnersGuide/Download. Requirements for the Python version: 3.8.2 or greater.
