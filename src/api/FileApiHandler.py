@@ -1,11 +1,14 @@
 from flask import abort, request, send_file
 from flask_restful import Resource
 from flasgger import swag_from
+from tasks import discovery_task
 
 class FileApiHandler(Resource):
   @swag_from('./../swagger/file_get.yml', methods=['GET'])
   def get(self):
     try:
+      result = discovery_task.delay(2,3)
+      print(result)
       file_path = request.args["fileName"]
       file_category = file_path.rsplit('_')[0]
       dir_prefix = "/tmp/"

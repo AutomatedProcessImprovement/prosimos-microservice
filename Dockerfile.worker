@@ -1,0 +1,50 @@
+# stage 1: build
+FROM python:3.9-slim-buster AS builder
+
+# set up virtualenv
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# update pip
+RUN apt-get update && \
+    apt-get install -y git && \
+    python3 -m pip install --upgrade pip
+
+WORKDIR /app
+
+# copy contents of project into docker
+COPY .git/ ./.git/
+COPY .gitmodules/ .
+COPY ./requirements.txt .
+
+# define from where we need to load Prosimos app
+# 1) pull from the repository main branch
+# RUN git submodule update --init --recursive
+
+# 2) use local version of Prosimos (under the path ./external_tools/Prosimos)
+COPY external_tools/Prosimos external_tools/Prosimos
+
+RUN rm /app/external_tools/Prosimos/input_output_files.zip
+RUN pip install -r requirements.txt 
+RUN cd /app/external_tools/Prosimos && pip install -r requirements.txt
+RUN apt-get clean
+
+# stage 2: run the flask app
+FROM python:3.9-slim-buster
+
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+COPY --from=builder /opt/venv /opt/venv
+COPY --from=builder /app/external_tools /app/external_tools
+
+WORKDIR /app
+COPY ./src ./src
+COPY ./exts.py .
+COPY ./factory.py .
+COPY ./tasks.py .
+COPY ./app.py .
+
+ENTRYPOINT celery -A exts.celery worker --loglevel=INFO
