@@ -1,42 +1,39 @@
 from flask import abort, request, send_file
 from flask_restful import Resource
-import tempfile
 from flasgger import swag_from
+import os
+import tempfile
 
-from bpdfr_discovery.log_parser import preprocess_xes_log
+from src.tasks import discovery_task
 
 class DiscoveryApiHandler(Resource):
   @swag_from('./../swagger/discovery_post.yml', methods=['POST'])
   def post(self):
     try:
-      dir_prefix = "/tmp"
       files_data = request.files
       logs_file = files_data.get('logsFile')
       model_file = files_data.get('bpmnFile')
 
-      logs_temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".json", prefix="input_logs_", delete=False, dir=dir_prefix)
-      with open(logs_temp_file.name, 'wb') as f:
-        logs_file.save(f)
+      curr_dir_path = os.path.abspath(os.path.dirname(__file__))
+      celery_data_path = os.path.abspath(os.path.join(curr_dir_path, '..', 'celery/data'))
+      
+      logs_ext = logs_file.filename.split(".")[-1]
+      logs_temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix="."+logs_ext, prefix="input_logs_", delete=False, dir=celery_data_path)
+      logs_file.save(logs_temp_file.name)
+      logs_filename = logs_temp_file.name.split('/')[-1]
 
-      model_temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".json", prefix="model_", delete=False, dir=dir_prefix)
-      with open(model_temp_file.name, 'wb') as f:
-        model_file.save(f)
+      model_ext = model_file.filename.split(".")[-1]
+      model_temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix="."+model_ext, prefix="model_", delete=False, dir=celery_data_path)
+      model_file.save(model_temp_file.name)
+      model_filename = model_temp_file.name.split('/')[-1]
 
-      res_temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".json", prefix="discovery_results_", delete=False, dir=dir_prefix)
+      res = discovery_task.delay(logs_filename, model_filename)
 
-      print(logs_temp_file)
-      print(logs_temp_file.name)
+      return res.id
 
-      [granule, conf, supp, part, adj_calendar] = [60, 0.1, 0.9, 0.6, True]
-
-      _ = preprocess_xes_log(logs_temp_file.name,
-                                        model_temp_file.name,
-                                        res_temp_file.name, granule, conf, supp, part,
-                                        adj_calendar)
-
-      return send_file(res_temp_file.name,
-                mimetype="application/json",
-                attachment_filename="parameters.json", as_attachment=True)
+      # return send_file(res_temp_file.name,
+      #           mimetype="application/json",
+      #           attachment_filename="parameters.json", as_attachment=True)
 
     except Exception as e:
       print(e)

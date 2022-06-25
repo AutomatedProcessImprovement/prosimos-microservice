@@ -21,7 +21,10 @@ services:
         container_name: prosimos-celery-worker
         environment:
             - CELERY_BROKER_URL=amqp://rabbit:5672/
+            - CELERY_RESULT_BACKEND=rpc://rabbit:5672/
             - FLASK_DEBUG=1
+        volumes:
+            - ./src/celery/data:/app/src/celery/data
         depends_on: 
         - rabbit
 
@@ -33,6 +36,9 @@ services:
         container_name: prosimos-api
         ports:
             - 5000:5000
+        volumes:
+            - ./src/celery/data:/app/src/celery/data
         environment:
             - CELERY_BROKER_URL=amqp://rabbit:5672/
+            - CELERY_RESULT_BACKEND=rpc://rabbit:5672/
             - FLASK_DEBUG=1

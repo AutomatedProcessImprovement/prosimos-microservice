@@ -3,6 +3,7 @@ from factory import create_app, create_swagger
 from src.api.FileApiHandler import FileApiHandler
 from src.api.SimulationApiHandler import SimulationApiHandler
 from src.api.DiscoveryApiHandler import DiscoveryApiHandler
+from src.api.TaskApiHandler import TaskApiHandler
 
 app = create_app()
 api = Api(app, prefix='/api')
@@ -27,3 +28,4 @@ def serve(path):
 api.add_resource(SimulationApiHandler, '/simulate')
 api.add_resource(FileApiHandler, '/simulationFile')
 api.add_resource(DiscoveryApiHandler, '/discovery')
+api.add_resource(TaskApiHandler, '/task')

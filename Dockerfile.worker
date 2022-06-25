@@ -44,7 +44,6 @@ WORKDIR /app
 COPY ./src ./src
 COPY ./exts.py .
 COPY ./factory.py .
-COPY ./tasks.py .
 COPY ./app.py .
 
 ENTRYPOINT celery -A exts.celery worker --loglevel=INFO
