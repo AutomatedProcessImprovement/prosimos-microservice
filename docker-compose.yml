@@ -21,7 +21,7 @@ services:
         container_name: prosimos-celery-worker
         environment:
             - CELERY_BROKER_URL=amqp://rabbit:5672/
-            - CELERY_RESULT_BACKEND=rpc://rabbit:5672/
+            - CELERY_RESULT_BACKEND=redis://redis:6379/
             - FLASK_DEBUG=1
         volumes:
             - ./src/celery/data:/app/src/celery/data
@@ -40,5 +40,10 @@ services:
             - ./src/celery/data:/app/src/celery/data
         environment:
             - CELERY_BROKER_URL=amqp://rabbit:5672/
-            - CELERY_RESULT_BACKEND=rpc://rabbit:5672/
+            - CELERY_RESULT_BACKEND=redis://redis:6379/
             - FLASK_DEBUG=1
+    
+    redis:
+        image: redis:6-alpine
+        ports:
+            - 6379:6379

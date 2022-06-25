@@ -25,11 +25,7 @@ def create_app():
 
     # celery config
     app.config['CELERY_BROKER_URL'] = os.environ.get("CELERY_BROKER_URL", "amqp://guest:guest@localhost:5672/")
-    # app.config['CELERY_RESULT_BACKEND'] = 'amqp://myuser:mypassword@localhost:5672/myvhost'
-    # app.config['event_serializer'] = 'pickle'
-    # app.config['result_serializer'] = 'pickle'
-    # app.config['task_serializer'] = 'pickle'
-    # celery.conf.accept_content = ["json","pickle","yaml"]
+    app.config['CELERY_RESULT_BACKEND'] = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
 
     return app
 
@@ -50,7 +46,14 @@ def create_celery(app):
 
     # configure Celery
     celery.conf.update(
-        broker_url=app.config['CELERY_BROKER_URL']
+        CELERY_BROKER_URL=app.config['CELERY_BROKER_URL'],
+        CELERY_RESULT_BACKEND = app.config['CELERY_RESULT_BACKEND'],
+        CELERY_RESULT_PERSISTENT=True,
+        CELERY_ACCEPT_CONTENT = ['json'],
+        CELERY_TASK_SERIALIZER = 'json',
+        CELERY_RESULT_SERIALIZER = 'json',
+        CELERY_IGNORE_RESULT = False,
+        CELERY_TRACK_STARTED = True
     )
     celery.Task = ContextTask
 

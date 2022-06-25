@@ -1,13 +1,24 @@
-from exts import celery
-from flask import request
+from exts import celery as celery_app
+from flask import make_response, request
 from flask_restful import Resource
-from src.tasks import discovery_task
+from celery.result import AsyncResult
+from celery import states
 
 class TaskApiHandler(Resource):
   def get(self):
     task_id = request.args["taskId"]
     
-    res = discovery_task.AsyncResult(task_id, app=celery)
-    print(res.state)
-    # print(res.get())
-    return res.state
+    res = AsyncResult(task_id, app=celery_app)
+
+    task_status = res.status
+    task_res = res.get() if (task_status == states.SUCCESS) else ""
+    
+    str = f"""{{
+      "TaskId": {task_id},
+      "TaskStatus": {task_status},
+      "TaskResponse": {task_res}
+}}"""
+
+    response = make_response(str)
+    response.headers['content-type'] = 'application/json'
+    return response

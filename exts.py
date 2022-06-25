@@ -1,3 +1,3 @@
 from celery import Celery
 
-celery = Celery("prosimos_celery", backend='rpc://', include=['src.tasks'])
+celery = Celery("prosimos_celery", include=['src.tasks'])
