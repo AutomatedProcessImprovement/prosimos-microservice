@@ -3,6 +3,7 @@ from flask import make_response, request
 from flask_restful import Resource
 from celery.result import AsyncResult
 from celery import states
+import json
 
 class TaskApiHandler(Resource):
   def get(self):
@@ -14,9 +15,9 @@ class TaskApiHandler(Resource):
     task_res = res.get() if (task_status == states.SUCCESS) else ""
     
     str = f"""{{
-      "TaskId": {task_id},
-      "TaskStatus": {task_status},
-      "TaskResponse": {task_res}
+      "TaskId": "{task_id}",
+      "TaskStatus": "{task_status}",
+      "TaskResponse": {json.dumps(task_res)}
 }}"""
 
     response = make_response(str)

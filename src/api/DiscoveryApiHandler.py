@@ -1,4 +1,4 @@
-from flask import abort, request, send_file
+from flask import make_response, request
 from flask_restful import Resource
 from flasgger import swag_from
 import os
@@ -27,9 +27,21 @@ class DiscoveryApiHandler(Resource):
       model_file.save(model_temp_file.name)
       model_filename = model_temp_file.name.split('/')[-1]
 
-      res = discovery_task.delay(logs_filename, model_filename)
+      task_response = ""
+      # if (os.environ.get("FLASK_ENV", "development") == "development"):
+      #   # run task locally, do not connect to AMQP
+      #   task_response = discovery_task(logs_filename, model_filename)
+      # else:
+      task = discovery_task.delay(logs_filename, model_filename)
+      task_id = task.id
 
-      return res.id
+      task_response = f"""{{
+        "TaskId": "{task_id}"
+}}"""
+
+      response = make_response(task_response)
+      response.headers['content-type'] = 'application/json'
+      return response
 
       # return send_file(res_temp_file.name,
       #           mimetype="application/json",
