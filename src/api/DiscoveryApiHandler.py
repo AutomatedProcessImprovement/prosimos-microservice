@@ -7,6 +7,14 @@ import tempfile
 from src.tasks import discovery_task
 
 class DiscoveryApiHandler(Resource):
+  def __saveFile(self, fileStorage, prefix, filePath):
+      file_ext = fileStorage.filename.split(".")[-1]
+      temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix="."+file_ext, prefix=prefix, delete=False, dir=filePath)
+      fileStorage.save(temp_file.name)
+      filename = temp_file.name.split('/')[-1]
+
+      return filename
+  
   @swag_from('./../swagger/discovery_post.yml', methods=['POST'])
   def post(self):
     try:
@@ -17,21 +25,13 @@ class DiscoveryApiHandler(Resource):
       curr_dir_path = os.path.abspath(os.path.dirname(__file__))
       celery_data_path = os.path.abspath(os.path.join(curr_dir_path, '..', 'celery/data'))
       
-      logs_ext = logs_file.filename.split(".")[-1]
-      logs_temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix="."+logs_ext, prefix="input_logs_", delete=False, dir=celery_data_path)
-      logs_file.save(logs_temp_file.name)
-      logs_filename = logs_temp_file.name.split('/')[-1]
+      logs_filename = self.__saveFile(logs_file, "input_logs_", celery_data_path)
+      model_filename = self.__saveFile(model_file, "model_", celery_data_path)
 
-      model_ext = model_file.filename.split(".")[-1]
-      model_temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix="."+model_ext, prefix="model_", delete=False, dir=celery_data_path)
-      model_file.save(model_temp_file.name)
-      model_filename = model_temp_file.name.split('/')[-1]
-
-      task_response = ""
+      # run task locally, do not connect to AMQP
       # if (os.environ.get("FLASK_ENV", "development") == "development"):
-      #   # run task locally, do not connect to AMQP
       #   task_response = discovery_task(logs_filename, model_filename)
-      # else:
+
       task = discovery_task.delay(logs_filename, model_filename)
       task_id = task.id
 
@@ -42,10 +42,6 @@ class DiscoveryApiHandler(Resource):
       response = make_response(task_response)
       response.headers['content-type'] = 'application/json'
       return response
-
-      # return send_file(res_temp_file.name,
-      #           mimetype="application/json",
-      #           attachment_filename="parameters.json", as_attachment=True)
 
     except Exception as e:
       print(e)

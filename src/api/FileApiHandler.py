@@ -1,8 +1,8 @@
 from flask import abort, request, send_file
 from flask_restful import Resource
 from flasgger import swag_from
-from src.tasks import discovery_task
 import os
+
 class FileApiHandler(Resource):
 
   @swag_from('./../swagger/file_get.yml', methods=['GET'])
