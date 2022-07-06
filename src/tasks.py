@@ -1,3 +1,5 @@
+from io import StringIO
+import json
 from celery.utils.log import get_task_logger
 import tempfile
 import os
@@ -5,11 +7,17 @@ from datetime import datetime
 
 from bpdfr_discovery.log_parser import preprocess_xes_log
 from bpdfr_simulation_engine.simulation_engine import run_simulation
+import pandas as pd
 
 from factory import create_celery, create_app
 
 logger = get_task_logger(__name__)
 celery = create_celery(create_app())
+
+def __getJsonString(out):
+    df_out = pd.read_csv(StringIO(out), skiprows=1)
+    df_out_json = df_out.to_json(orient='records')
+    return df_out_json
 
 @celery.task(name='discovery_task')
 def discovery_task(logs_filename, model_filename):
@@ -65,8 +73,22 @@ def simulation_task(model_filename, params_filename, num_processes, start_date):
         stat_out_path=stats_file.name,
         log_out_path=logs_file.name,
         starting_at=date)
+    
+    with stats_file as f:
+        contents = f.read()
+
+    _, out2, out3, out4 = contents.split('\n""\n')
+
+    df_out2_json = __getJsonString(out2)
+    df_out3_json = __getJsonString(out3)
+    df_out4_json = __getJsonString(out4)
+
+    print(df_out2_json)
 
     return {
-        "stats_filename": stats_filename,
-        "logs_filename": logs_filename
+        "ResourceUtilization": json.dumps(df_out2_json),
+        "IndividualTaskStatistics": json.dumps(df_out3_json),
+        "OverallScenarioStatistics": json.dumps(df_out4_json),
+        "StatsFilename": stats_filename,
+        "LogsFilename": logs_filename
     }
