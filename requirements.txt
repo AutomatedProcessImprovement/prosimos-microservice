@@ -15,4 +15,4 @@ simpy==4.0.1
 six==1.16.0
 Werkzeug==2.0.3
 celery==5.2.7
-redis==6.2.7
+redis

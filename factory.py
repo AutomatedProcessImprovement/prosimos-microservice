@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 from flasgger import Swagger
+from celery.schedules import crontab
 import os
 
 from exts import celery
@@ -53,7 +54,14 @@ def create_celery(app):
         CELERY_TASK_SERIALIZER = 'json',
         CELERY_RESULT_SERIALIZER = 'json',
         CELERY_IGNORE_RESULT = False,
-        CELERY_TRACK_STARTED = True
+        CELERY_TRACK_STARTED = True,
+        CELERYBEAT_SCHEDULE = {
+            'every-hour-celery-data-clear': {
+                'task': 'src.tasks.clear_celery_folder',
+                'schedule': crontab(minute='0', hour='*/1'),
+                'args': ()
+            },
+        }
     )
     celery.Task = ContextTask
 

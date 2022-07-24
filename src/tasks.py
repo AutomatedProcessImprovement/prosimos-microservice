@@ -4,10 +4,11 @@ from celery.utils.log import get_task_logger
 import tempfile
 import os
 from datetime import datetime
+import pandas as pd
+import time
 
 from bpdfr_discovery.log_parser import preprocess_xes_log
 from bpdfr_simulation_engine.simulation_engine import run_simulation
-import pandas as pd
 
 from factory import create_celery, create_app
 
@@ -92,3 +93,25 @@ def simulation_task(model_filename, params_filename, num_processes, start_date):
         "StatsFilename": stats_filename,
         "LogsFilename": logs_filename
     }
+
+@celery.task()
+def clear_celery_folder():
+    curr_dir_path = os.path.abspath(os.path.dirname(__file__))
+    celery_data_path = os.path.abspath(os.path.join(curr_dir_path, 'celery/data'))
+    
+    now = time.time()
+    deleted_files_count = 0
+
+    for f in os.listdir(celery_data_path):
+        if f == "README.md":
+            continue
+
+        file_path = os.path.join(celery_data_path, f)
+        if os.path.isfile(file_path):
+            if os.stat(file_path).st_mtime < now - 1 * 3600:
+                # if the age of the file is bigger than 1 hour
+                logger.info(f'{f} file removing ...')
+                os.remove(file_path)
+                deleted_files_count = deleted_files_count + 1
+
+    logger.info(f'In total deleted: {deleted_files_count} file(s) ')

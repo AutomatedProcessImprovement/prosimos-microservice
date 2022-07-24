@@ -46,4 +46,5 @@ COPY ./exts.py .
 COPY ./factory.py .
 COPY ./app.py .
 
-ENTRYPOINT celery -A exts.celery worker --loglevel=INFO
+ENTRYPOINT celery -A src.tasks.celery worker --loglevel=DEBUG
+# ENTRYPOINT celery -A src.tasks.celery beat --loglevel=DEBUG
