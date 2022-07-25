@@ -45,6 +45,8 @@ COPY ./src ./src
 COPY ./exts.py .
 COPY ./factory.py .
 COPY ./app.py .
+COPY ./celery.sh .
 
-ENTRYPOINT celery -A src.tasks.celery worker --loglevel=DEBUG
-# ENTRYPOINT celery -A src.tasks.celery beat --loglevel=DEBUG
+RUN chmod -R 777 ./celery.sh
+
+CMD [ "./celery.sh" ]
