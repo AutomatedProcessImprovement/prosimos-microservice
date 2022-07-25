@@ -26,16 +26,30 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
       
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
+      - name: [API] Extract metadata (tags, labels) for Docker
+        id: api_meta
         uses: docker/metadata-action@v4.0.1
         with:
           images: ${{ env.DOCKER_NAMESPACE }}/${{ env.DOCKER_REPOSITORY }}
       
-      - name: Build and push Docker image
+      - name: [API] Build and push Docker image
         uses: docker/build-push-action@v3.0.0
         with:
           context: .
           file: ./Dockerfile.api
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.api_meta.outputs.tags }}
+
+      - name: [CELERY] Extract metadata (tags, labels) for Docker 
+        id: celery_meta
+        uses: docker/metadata-action@v4.0.1
+        with:
+          images: ${{ env.DOCKER_NAMESPACE }}/${{ env.CELERY_DOCKER_REPOSITORY }}
+      
+      - name: [CELERY] Build and push Docker image
+        uses: docker/build-push-action@v3.0.0
+        with:
+          context: .
+          file: ./Dockerfile.worker
+          push: true
+          tags: ${{ steps.celery_meta.outputs.tags }}
