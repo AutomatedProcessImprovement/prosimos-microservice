@@ -8,6 +8,7 @@ env:
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   DOCKER_NAMESPACE: ${{ secrets.DOCKER_NAMESPACE }}
   DOCKER_REPOSITORY: ${{ secrets.DOCKER_REPOSITORY }}
+  CELERY_DOCKER_REPOSITORY: ${{ secrets.CELERY_DOCKER_REPOSITORY }}
 
 jobs:
   push_to_registry:
