@@ -1,16 +1,19 @@
 # stage 1: build
 FROM python:3.9-slim-buster AS builder
 
+# set up virtualenv
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
+# update pip
 RUN apt-get update && \
     apt-get install -y git && \
     python3 -m pip install --upgrade pip
 
 WORKDIR /app
 
+# copy contents of project into docker
 COPY .git/ ./.git/
 COPY .gitmodules/ .
 COPY ./requirements.txt .
@@ -42,8 +45,8 @@ COPY ./src ./src
 COPY ./exts.py .
 COPY ./factory.py .
 COPY ./app.py .
+COPY ./celery.sh .
 
-ENV FLASK_ENV production
+RUN chmod -R 777 ./celery.sh
 
-EXPOSE 5000
-CMD ["gunicorn", "--workers=3", "--threads=3", "-b", ":5000", "app:app", "--timeout 1000"]
+CMD [ "./celery.sh" ]

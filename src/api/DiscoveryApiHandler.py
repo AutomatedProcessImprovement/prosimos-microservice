@@ -1,41 +1,47 @@
-from flask import abort, request, send_file
+from flask import make_response, request
 from flask_restful import Resource
-import tempfile
 from flasgger import swag_from
+import os
+import tempfile
 
-from bpdfr_discovery.log_parser import preprocess_xes_log
+from src.tasks import discovery_task
 
 class DiscoveryApiHandler(Resource):
+  def __saveFile(self, fileStorage, prefix, filePath):
+      file_ext = fileStorage.filename.split(".")[-1]
+      temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix="."+file_ext, prefix=prefix, delete=False, dir=filePath)
+      fileStorage.save(temp_file.name)
+      filename = temp_file.name.split('/')[-1]
+
+      return filename
+  
   @swag_from('./../swagger/discovery_post.yml', methods=['POST'])
   def post(self):
     try:
-      dir_prefix = "/tmp"
       files_data = request.files
       logs_file = files_data.get('logsFile')
       model_file = files_data.get('bpmnFile')
 
-      logs_temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".json", prefix="input_logs_", delete=False, dir=dir_prefix)
-      with open(logs_temp_file.name, 'wb') as f:
-        logs_file.save(f)
+      curr_dir_path = os.path.abspath(os.path.dirname(__file__))
+      celery_data_path = os.path.abspath(os.path.join(curr_dir_path, '..', 'celery/data'))
+      
+      logs_filename = self.__saveFile(logs_file, "input_logs_", celery_data_path)
+      model_filename = self.__saveFile(model_file, "model_", celery_data_path)
 
-      model_temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".json", prefix="model_", delete=False, dir=dir_prefix)
-      with open(model_temp_file.name, 'wb') as f:
-        model_file.save(f)
+      # run task locally, do not connect to AMQP
+      # if (os.environ.get("FLASK_ENV", "development") == "development"):
+      #   task_response = discovery_task(logs_filename, model_filename)
 
-      res_temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".json", prefix="discovery_results_", delete=False, dir=dir_prefix)
+      task = discovery_task.delay(logs_filename, model_filename)
+      task_id = task.id
 
-      print(logs_temp_file.name)
+      task_response = f"""{{
+        "TaskId": "{task_id}"
+}}"""
 
-      [granule, conf, supp, part, adj_calendar] = [60, 0.1, 0.9, 0.6, True]
-
-      _ = preprocess_xes_log(logs_temp_file.name,
-                                        model_temp_file.name,
-                                        res_temp_file.name, granule, conf, supp, part,
-                                        adj_calendar)
-
-      return send_file(res_temp_file.name,
-                mimetype="application/json",
-                attachment_filename="parameters.json", as_attachment=True)
+      response = make_response(task_response)
+      response.headers['content-type'] = 'application/json'
+      return response
 
     except Exception as e:
       print(e)
