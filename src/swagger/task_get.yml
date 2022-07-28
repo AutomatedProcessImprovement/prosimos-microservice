@@ -1,0 +1,30 @@
+Get status of the task
+---
+tags:
+- Celery Task Management
+parameters:
+  - in: query
+    name: taskId
+    schema:
+      type: string
+    required: true
+    description: GUID of the task sent for the processing
+    default: 212c729d-f8f1-43df-a83c-3f75ba8ab668
+responses:
+  200:
+    description: File successfully found and returned
+    content:
+      application/json:
+        schema:
+          id: TaskStatusResult
+          properties:
+            TaskId:
+              type: string
+              description: GUID of the task
+            TaskStatus:
+              type: string
+            TaskResponse:
+              type: object
+              oneOf:
+                - $ref: '#/components/schemas/SimulationResult'
+                - $ref: '#/components/schemas/DiscoveryResult'

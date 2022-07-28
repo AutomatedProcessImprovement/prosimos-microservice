@@ -2,21 +2,18 @@ Discover the simulation parameters based on the logs file
 ---
 tags:
   - Discovery
-parameters:
-  - in: formData
-    name: bpmnFile
-    type: file
-    required: true
-    description: Process model written in the Business Process Model and Notation (BPMN)
-  - in: formData
-    name: logsFile
-    type: file
-    required: true
-    description: Logs files of the process (.xes or .csv format)
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+        $ref: '#/components/schemas/DiscoveryRequest'
 responses:
   200:
-    description: File successfully found and returned
+    description: Discovery Task was successfully started
     content:
-        application/json
+      application/json:
+        schema:
+          $ref: '#/components/schemas/TaskCreationResult'
   500:
     description: Something went wrong

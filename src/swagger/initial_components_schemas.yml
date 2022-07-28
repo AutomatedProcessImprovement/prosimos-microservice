@@ -1,0 +1,81 @@
+components:
+  
+  schemas:
+    
+    SimulationRequest:
+      type: object
+      properties:
+        startDate:
+          type: string
+          required: true
+          description: Datetime of the first process case in the simulation
+          default: "2022-05-03T12:05:19.1919+03:00"
+        numProcesses:
+          type: string
+          required: true
+          description: Number of process instances to simulate
+          example: 1
+        modelFile:
+          type: file
+          required: true
+          description: Process model written in the Business Process Model and Notation (BPMN)
+        simScenarioFile:
+          type: file
+          required: true
+          description: JSON file describing the simulation parameters
+    
+    SimulationResult:
+      type: object
+      properties:
+        ResourceUtilization:
+          type: object
+        IndividualTaskStatistics:
+          type: object
+        OverallScenarioStatistics:
+          type: object
+        LogsFilename:
+          type: string
+          description: Filename of the generated logs file temporarily stored on the server
+        StatsFilename:
+          type: string
+          description: Filename of the generated file with statistics temporarily stored on the server
+    
+    DiscoveryRequest:
+      type: object
+      properties:
+        bpmnFile:
+          type: file
+          required: true
+          description: Process model written in the Business Process Model and Notation (BPMN)
+        logsFile:
+          type: file
+          required: true
+          description: Logs files of the process (.xes or .csv format)
+    
+    DiscoveryResult:
+      type: object
+      properties:
+        discovery_res_filename:
+          type: string
+          description: Filename of the discovered scenario parameters file temporarily stored on the server
+
+    TaskCreationResult:
+      type: object
+      properties:
+        TaskId:
+          type: string
+          description: GUID of the created task
+      examples:
+        Example1:
+          TaskId: 10
+
+tags:
+  - name: Discovery
+    description: Initiating discovery of scenario parameters
+  - name: Simulation
+    description: Initiating the simulation
+  - name: File Management
+    description: Management of temporarily stored (1h limit) files
+  - name: Celery Task Management
+    description: Management of the created celery tasks
+  

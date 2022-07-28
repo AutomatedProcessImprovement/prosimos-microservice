@@ -1,19 +1,23 @@
 Get file which is temporarily saved on the server
 ---
 tags:
-  - Simulation
+  - File Management
+
 parameters:
   - in: query
     name: fileName
-    type: string
+    schema:
+      type: string
     required: true
-    description: Filename of the file (returned as a part of /api/simulate)
-    example: stats_xxxxxxxx.csv
+    description: Filename of the (temporarily stored) file
 responses:
   200:
     description: File successfully found and returned
     content:
-        application/json
+      application/json:
+        schema:
+          type: string
+          format: binary
   500:
     description: Something went wrong
   404:
