@@ -3,12 +3,17 @@ from flask_restful import Resource
 from flasgger import swag_from
 import os
 
+from src.exceptions import EmptyFilename
+
 class FileApiHandler(Resource):
 
   @swag_from('./../swagger/file_get.yml', methods=['GET'])
   def get(self):
     try:
       filename = request.args["fileName"]
+
+      if (filename == ""):
+        raise EmptyFilename()
 
       curr_dir_path = os.path.abspath(os.path.dirname(__file__))
       file_path = os.path.abspath(os.path.join(curr_dir_path, '..', 'celery/data/', filename))
