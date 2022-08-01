@@ -27,6 +27,7 @@ services:
             - ./src/celery/data:/app/src/celery/data
         depends_on: 
         - rabbit
+        - redis
 
     # flask app deployment
     api:
