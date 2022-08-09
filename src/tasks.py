@@ -1,7 +1,7 @@
 from io import StringIO
 import json
 from bpdfr_discovery.exceptions import NotXesFormatException
-from bpdfr_simulation_engine.exceptions import InvalidBpmnModelException
+from bpdfr_simulation_engine.exceptions import InvalidBpmnModelException, InvalidLogFileException
 from celery.utils.log import get_task_logger
 import tempfile
 import os
@@ -48,7 +48,11 @@ def discovery_task(logs_filename, model_filename):
         filename = res_temp_file.name.split('/')[-1]
         
         return { "discovery_res_filename": filename }
-    except (NotXesFormatException, InvalidBpmnModelException) as error:
+    except (
+        NotXesFormatException, 
+        InvalidBpmnModelException, 
+        InvalidLogFileException
+    ) as error:
         print('An exception occurred: {}'.format(error))
         return {
             "success": False,
