@@ -28,11 +28,20 @@ class DiscoveryApiHandler(Resource):
       logs_filename = self.__saveFile(logs_file, "input_logs_", celery_data_path)
       model_filename = self.__saveFile(model_file, "model_", celery_data_path)
 
+      is_xes = False
+      logs_mimetype = logs_file.mimetype.split("/")[-1]
+      if (logs_mimetype == 'csv'):
+        is_xes = True
+      else:
+        logs_extension = logs_filename.split(".")[-1]
+        if (logs_extension != 'xes'):
+          print(f"WARNING: Extension {logs_extension} of the log file is not supported")
+
       # run task locally, do not connect to AMQP
       # if (os.environ.get("FLASK_ENV", "development") == "development"):
       #   task_response = discovery_task(logs_filename, model_filename)
 
-      task = discovery_task.delay(logs_filename, model_filename)
+      task = discovery_task.delay(logs_filename, model_filename, is_xes)
       task_id = task.id
 
       task_response = f"""{{
