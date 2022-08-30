@@ -46,21 +46,20 @@ class DiscoveryApiHandler(Resource):
       curr_dir_path = os.path.abspath(os.path.dirname(__file__))
       celery_data_path = os.path.abspath(os.path.join(curr_dir_path, '..', 'celery/data'))
       
-      logs_mimetype = logs_file.mimetype.split("/")[-1]
+      in_logs_mimetype = logs_file.mimetype.split("/")[-1]
       logs_filename = ""
 
       logs_filename = \
-        self.__saveFileFromZip(logs_file, celery_data_path) if logs_mimetype == 'zip' else \
+        self.__saveFileFromZip(logs_file, celery_data_path) if in_logs_mimetype == 'zip' else \
         self.__saveFile(logs_file, "input_logs_", celery_data_path)
 
       model_filename = self.__saveFile(model_file, "model_", celery_data_path)
 
+      logs_extension = logs_filename.split(".")[-1]
       is_xes = False
-      if (logs_mimetype == 'csv'):
+      if (logs_extension == 'csv'):
         is_xes = True
-      else:
-        logs_extension = logs_filename.split(".")[-1]
-        if (logs_extension != 'xes'):
+      elif (logs_extension != 'xes'):
           print(f"WARNING: Extension {logs_extension} of the log file is not supported")
 
       task = discovery_task.delay(logs_filename, model_filename, is_xes)
