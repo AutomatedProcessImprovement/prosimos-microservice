@@ -23,7 +23,7 @@ def __getJsonString(out):
     return df_out_json
 
 @celery.task(name='discovery_task')
-def discovery_task(logs_filename, model_filename):
+def discovery_task(logs_filename, model_filename, is_xes):
     try: 
         logger.info(f'Logs file: {logs_filename}')
         logger.info(f'Model file: {model_filename}')
@@ -41,7 +41,8 @@ def discovery_task(logs_filename, model_filename):
         _ = preprocess_xes_log(logs_path,
                                         model_path,
                                         res_temp_file.name, granule, conf, supp, part,
-                                        adj_calendar)
+                                        adj_calendar,
+                                        is_xes)
 
         logger.info(res_temp_file.name)
 
