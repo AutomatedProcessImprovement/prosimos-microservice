@@ -46,7 +46,7 @@ def discovery_task(logs_filename, model_filename, is_xes):
 
         logger.info(res_temp_file.name)
 
-        filename = res_temp_file.name.split('/')[-1]
+        filename = res_temp_file.name.split(os.sep)[-1]
         
         return { "discovery_res_filename": filename }
     except (
@@ -80,11 +80,11 @@ def simulation_task(model_filename, params_filename, num_processes, start_date):
 
     # create result file for saving statistics
     stats_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="stats_", delete=False, dir=celery_data_path)
-    stats_filename = stats_file.name.rsplit('/', 1)[-1]
+    stats_filename = stats_file.name.rsplit(os.sep, 1)[-1]
 
     # create result file for saving logs
     logs_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="logs_", delete=False, dir=celery_data_path)
-    logs_filename = logs_file.name.rsplit('/', 1)[-1]
+    logs_filename = logs_file.name.rsplit(os.sep, 1)[-1]
 
     _ = run_simulation(model_path, params_path,
         total_cases=int(num_processes),

@@ -1,3 +1,4 @@
+import zipfile
 from flask import make_response, request
 from flask_restful import Resource
 from flasgger import swag_from
@@ -12,7 +13,7 @@ class DiscoveryApiHandler(Resource):
       file_ext = fileStorage.filename.split(".")[-1]
       temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix="."+file_ext, prefix=prefix, delete=False, dir=filePath)
       fileStorage.save(temp_file.name)
-      filename = temp_file.name.split('/')[-1]
+      filename = temp_file.name.split(os.sep)[-1]
 
       return filename
 
@@ -32,7 +33,7 @@ class DiscoveryApiHandler(Resource):
         with open(temp_file.name, "wb") as f:
           f.write(zf.read(zip_log_filename))
         
-        filename = temp_file.name.split('/')[-1]
+        filename = temp_file.name.split(os.sep)[-1]
         return filename
 
   
@@ -46,11 +47,13 @@ class DiscoveryApiHandler(Resource):
       curr_dir_path = os.path.abspath(os.path.dirname(__file__))
       celery_data_path = os.path.abspath(os.path.join(curr_dir_path, '..', 'celery/data'))
       
-      in_logs_mimetype = logs_file.mimetype.split("/")[-1]
-      logs_filename = ""
+      # in_logs_mimetype = logs_file.mimetype.split("/")[-1]
+      print(logs_file.mimetype)
 
+      is_zipfile = zipfile.is_zipfile(logs_file)
+      
       logs_filename = \
-        self.__saveFileFromZip(logs_file, celery_data_path) if in_logs_mimetype == 'zip' else \
+        self.__saveFileFromZip(logs_file, celery_data_path) if is_zipfile else \
         self.__saveFile(logs_file, "input_logs_", celery_data_path)
 
       model_filename = self.__saveFile(model_file, "model_", celery_data_path)

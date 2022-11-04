@@ -12,7 +12,7 @@ class SimulationApiHandler(Resource):
     file_ext = fileStorage.filename.split(".")[-1]
     temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix="."+file_ext, prefix=prefix, delete=False, dir=filePath)
     fileStorage.save(temp_file.name)
-    filename = temp_file.name.split('/')[-1]
+    filename = temp_file.name.split(os.sep)[-1]
 
     return filename
 
