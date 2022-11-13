@@ -1,11 +1,10 @@
 from io import StringIO
 import json
-from bpdfr_discovery.exceptions import NotXesFormatException
+from bpdfr_discovery.exceptions import InvalidInputDiscoveryParameters, NotXesFormatException
 from bpdfr_simulation_engine.exceptions import InvalidBpmnModelException, InvalidLogFileException
 from celery.utils.log import get_task_logger
 import tempfile
 import os
-from datetime import datetime
 import pandas as pd
 import time
 
@@ -52,7 +51,8 @@ def discovery_task(logs_filename, model_filename, is_xes):
     except (
         NotXesFormatException, 
         InvalidBpmnModelException, 
-        InvalidLogFileException
+        InvalidLogFileException,
+        InvalidInputDiscoveryParameters
     ) as error:
         print('An exception occurred: {}'.format(error))
         return {
@@ -69,8 +69,6 @@ def simulation_task(model_filename, params_filename, num_processes, start_date):
     logger.info(f'Params file: {params_filename}')
     logger.info(f'Num of instances: {num_processes}')
     logger.info(f'Starting at: {start_date}')
-
-    date = datetime.strptime(start_date, "%Y-%m-%dT%H:%M:%S.%f%z")
 
     curr_dir_path = os.path.abspath(os.path.dirname(__file__))
     celery_data_path = os.path.abspath(os.path.join(curr_dir_path, 'celery/data'))
@@ -90,7 +88,8 @@ def simulation_task(model_filename, params_filename, num_processes, start_date):
         total_cases=int(num_processes),
         stat_out_path=stats_file.name,
         log_out_path=logs_file.name,
-        starting_at=date)
+        starting_at=start_date,
+        is_event_added_to_log=False)
     
     with stats_file as f:
         contents = f.read()
