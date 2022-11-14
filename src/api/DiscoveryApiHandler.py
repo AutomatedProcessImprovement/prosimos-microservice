@@ -12,6 +12,8 @@ class DiscoveryApiHandler(Resource):
   def __saveFile(self, fileStorage, prefix, filePath):
       file_ext = fileStorage.filename.split(".")[-1]
       temp_file = tempfile.NamedTemporaryFile(mode="w+", suffix="."+file_ext, prefix=prefix, delete=False, dir=filePath)
+      # in case a file pointer is in the end of the file
+      fileStorage.seek(0)
       fileStorage.save(temp_file.name)
       filename = temp_file.name.split(os.sep)[-1]
 
