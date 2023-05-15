@@ -1,4 +1,0 @@
-[submodule "external_tools/Prosimos"]
-	path = external_tools/Prosimos
-	url = https://github.com/AutomatedProcessImprovement/Prosimos.git
-	branch = main

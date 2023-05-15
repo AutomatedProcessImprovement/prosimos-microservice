@@ -7,21 +7,29 @@
 The open-source web server implemented as a part of the [Prosimos Web Application](https://github.com/AutomatedProcessImprovement/prosimos-docker).
 
 ## Start the web server locally (via locally installed Python)
-> Please, note that you need to have `Python` installed in order to follow the following steps. The installation instructions could be found here: https://wiki.python.org/moin/BeginnersGuide/Download. Requirements for the Python version: 3.8.2 or greater.
 
-1) Create a new virtual environment
-    ```
-    python3 -m venv env
-    ```
+### Prerequisites
 
-2) Activate it
+- `Python` - 3.8 or greater (https://wiki.python.org/moin/BeginnersGuide/Download)
+- `pip`
+- `poetry` 1.4.2:
     ```
-    source env/bin/activate
+    pip install poetry==1.4.2
     ```
 
-3) Install all required modules. They are listed in [requirements.txt](https://github.com/AutomatedProcessImprovement/prosimos-microservice/blob/main/requirements.txt)
+1) Create and activate a new virtual environment. Since `poetry.toml` defines `in-project true`, a virtual environment is created under `/.venv` path.
     ```
-    pip3 install -r requirements.txt
+    poetry shell
+    ```
+
+2) Install all required modules. They are listed in [pyproject.toml](https://github.com/AutomatedProcessImprovement/prosimos-microservice/blob/main/pyproject.toml). 
+    ```
+    poetry install
+    ```
+
+3) Start a Flask web server
+    ```
+    poetry run flask run
     ```
 
 4) The web server is now running and available here: http://localhost:5000/apidocs/. The page lists all available endpoints and describes its input and output parameters. The detailed overview of how to use the Swagger is available [here](#access-api-endpoints) under `Swagger` section. Documentation also includes the description of how `curl` can be used to perform the requests.
