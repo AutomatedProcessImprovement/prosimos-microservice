@@ -35,9 +35,9 @@ jobs:
         run: |
           python -m poetry config virtualenvs.in-project true
 
-      - name: Create and activate a virtual env
+      - name: Check `pyproject.toml`
         run: |
-          poetry shell
+          poetry check
 
       - name: Install dependencies
         run: |
