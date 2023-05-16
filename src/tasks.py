@@ -1,7 +1,7 @@
 from io import StringIO
 import json
 from bpdfr_discovery.exceptions import InvalidInputDiscoveryParameters, NotXesFormatException
-from bpdfr_simulation_engine.exceptions import InvalidBpmnModelException, InvalidLogFileException
+from prosimos.exceptions import InvalidBpmnModelException, InvalidLogFileException
 from celery.utils.log import get_task_logger
 import tempfile
 import os
@@ -9,7 +9,7 @@ import pandas as pd
 import time
 
 from bpdfr_discovery.log_parser import preprocess_xes_log
-from bpdfr_simulation_engine.simulation_engine import run_simulation
+from prosimos.simulation_engine import run_simulation
 
 from factory import create_celery, create_app
 
