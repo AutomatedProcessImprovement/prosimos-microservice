@@ -4,7 +4,6 @@ version = "0.1.0"
 description = ""
 authors = ["Iryna Halenok"]
 readme = "README.md"
-packages = [{include = "src/api"}]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
@@ -17,6 +16,7 @@ celery = "^5.2.7"
 prosimos = "^1.2.3"
 flasgger = "^0.9.5"
 itsdangerous = "2.1.0"
+redis = "^4.5.5"
 
 
 [build-system]

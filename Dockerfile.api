@@ -1,49 +1,48 @@
-# stage 1: build
-FROM python:3.9-slim-buster AS builder
+# 
+# `python-base` stage
+#  contains all shared environment variables
+#
+FROM python:3.9-slim-buster as python-base
 
-ENV VIRTUAL_ENV=/opt/venv
-RUN python3 -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+ENV \
+    POETRY_VERSION=1.4.2 \
+    POETRY_HOME="/opt/poetry" \
+    POETRY_VIRTUALENVS_IN_PROJECT=true \
+    POETRY_NO_INTERACTION=1 \
+    VENV_PATH="/app/.venv"
 
-RUN apt-get update && \
-    apt-get install -y git && \
-    python3 -m pip install --upgrade pip
+ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
-WORKDIR /app
+#
+# `builder-base` stage
+#  used to build poetry
+#
+FROM python-base as builder-base
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+        curl
 
-COPY .git/ ./.git/
-COPY .gitmodules/ .
-COPY ./requirements.txt .
+# install poetry
+RUN curl -sSL https://install.python-poetry.org | python3 -
 
-# define from where we need to load Prosimos app
-# 1) pull from the repository main branch
-# RUN git submodule update --init --recursive
+#
+# `development` stage
+#  used to create a virtual environment and start server
+#
+FROM python-base as development
 
-# 2) use local version of Prosimos (under the path ./external_tools/Prosimos)
-COPY external_tools/Prosimos external_tools/Prosimos
-
-RUN rm /app/external_tools/Prosimos/input_output_files.zip
-RUN pip install -r requirements.txt 
-RUN cd /app/external_tools/Prosimos && pip install -r requirements.txt
-RUN apt-get clean
-
-# stage 2: run the flask app
-FROM python:3.9-slim-buster
-
-ENV VIRTUAL_ENV=/opt/venv
-RUN python3 -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-
-COPY --from=builder /opt/venv /opt/venv
-COPY --from=builder /app/external_tools /app/external_tools
+# copy built poetry
+COPY --from=builder-base $POETRY_HOME $POETRY_HOME
 
 WORKDIR /app
+COPY poetry.lock pyproject.toml poetry.toml .
 COPY ./src ./src
-COPY ./exts.py .
-COPY ./factory.py .
-COPY ./app.py .
+COPY exts.py factory.py app.py .
 
-ENV FLASK_ENV production
+# do not install dev dependencies
+RUN poetry install --only main
+
+ENV FLASK_DEBUG=0
 
 EXPOSE 5000
 CMD ["gunicorn", "--workers=3", "--threads=3", "-b", ":5000", "app:app", "--timeout 1000"]
