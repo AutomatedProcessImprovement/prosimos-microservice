@@ -1,8 +1,8 @@
 # Prosimos Web Server
 
-![dependencies_badge](https://github.com/AutomatedProcessImprovement/prosimos-microservice/actions/workflows/deps-python-app.yml/badge.svg)
+[![dependencies_badge](https://github.com/AutomatedProcessImprovement/prosimos-microservice/actions/workflows/deps-python-app.yml/badge.svg)](https://github.com/AutomatedProcessImprovement/prosimos-microservice/actions/workflows/deps-python-app.yml)
 
-![dependencies_badge](https://github.com/AutomatedProcessImprovement/prosimos-microservice/actions/workflows/docker-image.yml/badge.svg)
+[![Docker Image CI](https://github.com/AutomatedProcessImprovement/prosimos-microservice/actions/workflows/docker-image.yml/badge.svg)](https://github.com/AutomatedProcessImprovement/prosimos-microservice/actions/workflows/docker-image.yml)
 
 The open-source web server implemented as a part of the [Prosimos Web Application](https://github.com/AutomatedProcessImprovement/prosimos-docker).
 
