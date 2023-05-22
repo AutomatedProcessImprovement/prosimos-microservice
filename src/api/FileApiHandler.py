@@ -23,7 +23,7 @@ class FileApiHandler(Resource):
       filename_ext = filename.rsplit('.')[-1]
 
       return send_file(file_path,
-                attachment_filename=f"{filename_general}.{filename_ext}",
+                download_name=f"{filename_general}.{filename_ext}",
                 as_attachment=True)
 
     except FileNotFoundError as e:
