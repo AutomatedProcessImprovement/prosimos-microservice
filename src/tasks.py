@@ -1,17 +1,19 @@
-from io import StringIO
 import json
-from bpdfr_discovery.exceptions import InvalidInputDiscoveryParameters, NotXesFormatException
-from prosimos.exceptions import InvalidBpmnModelException, InvalidLogFileException
-from celery.utils.log import get_task_logger
-import tempfile
 import os
-import pandas as pd
+import tempfile
 import time
+from io import StringIO
 
+import pandas as pd
+from bpdfr_discovery.exceptions import (InvalidInputDiscoveryParameters,
+                                        NotXesFormatException)
 from bpdfr_discovery.log_parser import preprocess_xes_log
+from celery.utils.log import get_task_logger
+from factory import create_app, create_celery
+from prosimos.exceptions import (InvalidBpmnModelException,
+                                 InvalidLogFileException,
+                                 InvalidSimScenarioException)
 from prosimos.simulation_engine import run_simulation
-
-from factory import create_celery, create_app
 
 logger = get_task_logger(__name__)
 celery = create_celery(create_app())
@@ -65,50 +67,65 @@ def discovery_task(logs_filename, model_filename, is_xes):
 
 @celery.task(name='simulation_task')
 def simulation_task(model_filename, params_filename, num_processes, start_date):
-    logger.info(f'Model file: {model_filename}')
-    logger.info(f'Params file: {params_filename}')
-    logger.info(f'Num of instances: {num_processes}')
-    logger.info(f'Starting at: {start_date}')
+    try:
+        logger.info(f'Model file: {model_filename}')
+        logger.info(f'Params file: {params_filename}')
+        logger.info(f'Num of instances: {num_processes}')
+        logger.info(f'Starting at: {start_date}')
 
-    curr_dir_path = os.path.abspath(os.path.dirname(__file__))
-    celery_data_path = os.path.abspath(os.path.join(curr_dir_path, 'celery/data'))
+        curr_dir_path = os.path.abspath(os.path.dirname(__file__))
+        celery_data_path = os.path.abspath(os.path.join(curr_dir_path, 'celery/data'))
 
-    model_path = os.path.abspath(os.path.join(celery_data_path, model_filename))
-    params_path = os.path.abspath(os.path.join(celery_data_path, params_filename))
+        model_path = os.path.abspath(os.path.join(celery_data_path, model_filename))
+        params_path = os.path.abspath(os.path.join(celery_data_path, params_filename))
 
-    # create result file for saving statistics
-    stats_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="stats_", delete=False, dir=celery_data_path)
-    stats_filename = stats_file.name.rsplit(os.sep, 1)[-1]
+        # create result file for saving statistics
+        stats_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="stats_", delete=False, dir=celery_data_path)
+        stats_filename = stats_file.name.rsplit(os.sep, 1)[-1]
 
-    # create result file for saving logs
-    logs_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="logs_", delete=False, dir=celery_data_path)
-    logs_filename = logs_file.name.rsplit(os.sep, 1)[-1]
+        # create result file for saving logs
+        logs_file = tempfile.NamedTemporaryFile(mode="w+", suffix=".csv", prefix="logs_", delete=False, dir=celery_data_path)
+        logs_filename = logs_file.name.rsplit(os.sep, 1)[-1]
 
-    _ = run_simulation(model_path, params_path,
-        total_cases=int(num_processes),
-        stat_out_path=stats_file.name,
-        log_out_path=logs_file.name,
-        starting_at=start_date,
-        is_event_added_to_log=False)
-    
-    with stats_file as f:
-        contents = f.read()
+        _ = run_simulation(model_path, params_path,
+            total_cases=int(num_processes),
+            stat_out_path=stats_file.name,
+            log_out_path=logs_file.name,
+            starting_at=start_date,
+            is_event_added_to_log=False)
+        
+        with stats_file as f:
+            contents = f.read()
 
-    _, out2, out3, out4 = contents.split('\n""\n')
+        _, out2, out3, out4 = contents.split('\n""\n')
 
-    df_out2_json = __getJsonString(out2)
-    df_out3_json = __getJsonString(out3)
-    df_out4_json = __getJsonString(out4)
+        df_out2_json = __getJsonString(out2)
+        df_out3_json = __getJsonString(out3)
+        df_out4_json = __getJsonString(out4)
 
-    print(df_out2_json)
+        print(df_out2_json)
 
-    return {
-        "ResourceUtilization": json.dumps(df_out2_json),
-        "IndividualTaskStatistics": json.dumps(df_out3_json),
-        "OverallScenarioStatistics": json.dumps(df_out4_json),
-        "StatsFilename": stats_filename,
-        "LogsFilename": logs_filename
-    }
+        return {
+            "ResourceUtilization": json.dumps(df_out2_json),
+            "IndividualTaskStatistics": json.dumps(df_out3_json),
+            "OverallScenarioStatistics": json.dumps(df_out4_json),
+            "StatsFilename": stats_filename,
+            "LogsFilename": logs_filename
+        }
+    except (
+        NotXesFormatException, 
+        InvalidBpmnModelException, 
+        InvalidLogFileException,
+        InvalidSimScenarioException
+    ) as error:
+        print('An exception occurred: {}'.format(error))
+        return {
+            "success": False,
+            "errorMessage": str(error)
+        }
+    except BaseException as error:
+        print(f"An exception occurred: {str(error)}")
+        raise Exception(str(error))
 
 @celery.task()
 def clear_celery_folder():
