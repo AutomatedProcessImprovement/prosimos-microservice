@@ -10,7 +10,7 @@ The open-source web server implemented as a part of the [Prosimos Web Applicatio
 
 ### Prerequisites
 
-- `Python` - 3.8 or greater (https://wiki.python.org/moin/BeginnersGuide/Download)
+- `Python` - 3.9 or greater (https://wiki.python.org/moin/BeginnersGuide/Download)
 - `pip`
 - `poetry` 1.4.2:
     ```
